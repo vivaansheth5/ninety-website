@@ -7,19 +7,13 @@ function Rule({ x, y, width = 330 }) {
   return <rect x={x} y={y} width={width} height={2} fill={CREAM} fillOpacity={0.35} />;
 }
 
-function pad3(n) {
-  return String(Math.round(n)).padStart(3, '0');
-}
-
-export default function Readouts({ t, azimuth, angularVelocity, height, ballVelocity, visible }) {
+export default function Readouts({ t, angularVelocity, height, ballVelocity, visible }) {
   if (!visible) return null;
 
   const orbitToVolley = t >= CUES.Orbit && t <= CONTACT_T + 0.3;
   const duringContact = t >= CONTACT_T && t <= CUES.Impact;
   const fadeStart = CUES.Reveal;
   const fadeOpacity = t < fadeStart ? 1 : Math.max(0, 1 - Easing.easeOutQuart(Math.min(1, (t - fadeStart) / 0.3)));
-
-  const az360 = ((azimuth % 360) + 360) % 360;
 
   return (
     <g style={{ opacity: fadeOpacity }} fontFamily="Archivo, sans-serif" fill={CREAM}>
@@ -29,15 +23,6 @@ export default function Readouts({ t, azimuth, angularVelocity, height, ballVelo
       </text>
       <text x={96} y={180} fontSize={24} fontWeight={400} letterSpacing={2} fillOpacity={0.55}>
         {`BICYCLE VOLLEY · TC ${t.toFixed(2)}`}
-      </text>
-
-      {/* Camera azimuth — always visible */}
-      <Rule x={96} y={942} />
-      <text x={96} y={958} fontSize={24} letterSpacing={2} fillOpacity={0.55}>
-        CAMERA AZIMUTH
-      </text>
-      <text x={96} y={1006} fontSize={44} fontWeight={600} fill={LIVE}>
-        {pad3(az360)}°
       </text>
 
       {/* Angular velocity — Orbit -> Volley+0.3 */}

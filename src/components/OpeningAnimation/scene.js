@@ -27,6 +27,10 @@ export const Easing = {
   linear: (t) => t,
   easeInOutCubic: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
   easeOutQuart: (t) => 1 - Math.pow(1 - t, 4),
+  // A falling ball accelerates under gravity (starts slow, speeds up).
+  easeInQuad: (t) => t * t,
+  // A struck ball leaves the foot near its peak speed and only then settles.
+  easeOutCubic: (t) => 1 - Math.pow(1 - t, 3),
 };
 
 const clamp01 = (v) => Math.max(0, Math.min(1, v));
@@ -411,13 +415,15 @@ export function ballContactPoint(world) {
 export function ballPositionAt(t, contactPoint) {
   if (t <= CONTACT_T) {
     const s = clamp01((t - BALL_DROP_START_T) / (CONTACT_T - BALL_DROP_START_T));
-    const eased = Easing.easeInOutCubic(s);
+    // Falling under gravity: slow to start, accelerating into contact.
+    const eased = Easing.easeInQuad(s);
     return parabolicLerp(BALL_START, contactPoint, eased, 2.1, -1);
   }
   const postEnd = CONTACT_T + BALL_POST_DURATION;
   if (t <= postEnd) {
     const s = clamp01((t - CONTACT_T) / BALL_POST_DURATION);
-    const eased = Easing.easeInOutCubic(s);
+    // Struck ball: leaves the boot near peak speed, then settles into the net.
+    const eased = Easing.easeOutCubic(s);
     return parabolicLerp(contactPoint, BALL_POST_TARGET, eased, 2.0, 1);
   }
   // settle inside the net for the remainder

@@ -230,7 +230,6 @@ export default function OpeningAnimation({ onComplete }) {
 
           <Readouts
             t={t}
-            azimuth={cam.az}
             angularVelocity={angularVelocity}
             height={height}
             ballVelocity={ballVelocity}
