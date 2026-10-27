@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design tokens ─────────────────────────────────────────── */
+:root {
+  --ink: #111318;
+  --graphite: #202329;
+  --volt: #c7ff46;
+  --violet: #8a76ff;
+  --paper: #f6f7f3;
+  --snow: #f8f9fa;
+  --mist: #a6abb3;
+  --header-h: 60px;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 160ms;
+  --dur-base: 320ms;
+  --dur-slow: 700ms;
+  color-scheme: dark;
+}
+@media (min-width: 1024px) {
+  :root { --header-h: 72px; }
+}
+
+html { -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--header-h) + 16px); }
+body {
+  background: var(--ink);
+  color: var(--snow);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+::selection { background: var(--volt); color: var(--ink); }
+:focus-visible { outline: 2px solid var(--volt); outline-offset: 3px; border-radius: 6px; }
+img { -webkit-user-drag: none; }
+
+@layer components {
+  .container-x { @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-10; }
+  .eyebrow { @apply font-mono text-[11px] uppercase tracking-[0.18em] text-mist; }
+  .display { @apply font-display font-bold leading-[0.9] tracking-tightest; }
+  .h-section { @apply font-display text-[clamp(2rem,7vw,4.75rem)] font-bold uppercase leading-[0.9] tracking-tightest; }
+
+  .btn {
+    @apply relative inline-flex min-h-[48px] select-none items-center justify-center gap-2 rounded-full px-6 text-[15px] font-semibold
+      transition-[transform,background-color,color,box-shadow] duration-200 ease-out active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-volt { @apply btn bg-volt text-ink hover:shadow-[0_0_0_6px_rgba(199,255,70,0.18)]; }
+  .btn-dark { @apply btn bg-ink text-snow hover:bg-graphite; }
+  .btn-ghost { @apply btn border border-white/20 text-snow hover:border-white/60 hover:bg-white/5; }
+  .btn-ghost-dark { @apply btn border border-ink/20 text-ink hover:border-ink/60 hover:bg-ink/5; }
+  .icon-btn { @apply relative inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-white/10 active:scale-95; }
+
+  .chip { @apply inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[11px] uppercase tracking-[0.12em]; }
+  .surface-light { @apply bg-paper text-ink; }
+  .link-underline { background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; transition: background-size var(--dur-base) var(--ease-out); }
+  .link-underline:hover { background-size: 100% 1px; }
+}
+
+/* ── Reveal on scroll ──
+   Content is visible by default. Only elements that start BELOW the fold get `.pre`
+   (added before they are ever on screen), then `.in` when scrolled into view.
+   So reveals never delay first paint or LCP, and no-JS visitors see everything. */
+[data-reveal] { transition: opacity var(--dur-slow) var(--ease-out), transform var(--dur-slow) var(--ease-out); transition-delay: var(--d, 0ms); }
+[data-reveal].pre:not(.in) { opacity: 0; transform: translate3d(0, 28px, 0); }
+
+/* Kinetic headline: each word rises from a mask */
+.word-mask { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: 0.06em; margin-bottom: -0.06em; }
+.word-mask > span { display: inline-block; animation: rise 900ms var(--ease-out) both; animation-delay: var(--d, 0ms); }
+@keyframes rise { from { transform: translate3d(0, 105%, 0); } to { transform: none; } }
+
+/* Hero parallax driven by CSS variables set from pointer / scroll */
+.parallax { transform: translate3d(calc(var(--px, 0) * var(--depth, 10px)), calc(var(--py, 0) * var(--depth, 10px) + var(--sy, 0px)), 0); transition: transform 600ms var(--ease-out); will-change: transform; }
+
+/* Marquee */
+.marquee-track { animation: marquee 38s linear infinite; }
+.marquee:hover .marquee-track { animation-play-state: paused; }
+@keyframes marquee { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
+
+/* Spotlight that follows the pointer on product cards (desktop only) */
+@media (hover: hover) and (pointer: fine) {
+  .spotlight { --mx: 50%; --my: 50%; }
+  .spotlight::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity 300ms;
+    background: radial-gradient(420px circle at var(--mx) var(--my), rgba(199, 255, 70, 0.12), transparent 45%); }
+  .spotlight:hover::after { opacity: 1; }
+}
+
+/* Hide scrollbars on swipe rails while keeping them scrollable */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Animations pause when off-screen / tab hidden (class toggled by observer) */
+.paused, .paused * { animation-play-state: paused !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+  [data-reveal].pre:not(.in) { opacity: 1; transform: none; }
+  .parallax { transform: none !important; }
+  .marquee-track { animation: none; }
+}
+
+/* Page transition (see app/template.tsx) */
+/* Only after the first client-side navigation, so the initial paint/LCP is never hidden. */
+.navigated .page-enter { animation: fadeUp 450ms var(--ease-out) backwards; }
+@keyframes fadeUp { from { opacity: 0; transform: translate3d(0, 16px, 0); } to { opacity: 1; transform: none; } }

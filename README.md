@@ -1,3 +1,5 @@
+> **New:** the **IMPULSIFY** gadget storefront (Next.js, frontend-only, Shopify-ready) lives in [`impulsify/`](impulsify/README.md). The Ninety+ project below is unchanged.
+
 # Ninety+
 
 Premium football streetwear ecommerce site. React (Vite) frontend + a security-hardened Express backend, served together from a single process on **localhost:8083**.
